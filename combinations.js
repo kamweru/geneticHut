@@ -20,20 +20,18 @@ const generateLinePoints = () => {
   let points = [];
 
   while (points.length < 9) {
-    let randomCombinationPoint = Math.floor(
-      Math.random() * combinations.length
-    );
-    points.push(randomCombinationPoint);
-    // let randomPoint =
-    //   combinations[randomCombinationPoint][
-    //     Math.floor(Math.random() * combinations[randomCombinationPoint].length)
-    //   ];
-    // points.push(randomPoint);
-    // for (let i = 0; i < combinations[randomCombinationPoint].length; i++) {
-    //   if (combinations[randomCombinationPoint][i] === randomPoint) {
-    //     combinations[randomCombinationPoint].splice(i, 1);
-    //   }
-    // }
+    if (points.length === 0) {
+      let randomCombinationPoint = Math.floor(
+        Math.random() * combinations.length
+      );
+      points.push(randomCombinationPoint);
+    } else {
+      let prevPointArray = combinations[points[points.length - 1]];
+      let randomInt = Math.floor(Math.random() * prevPointArray.length);
+      let nextLinePoint = prevPointArray[randomInt];
+      points.push(nextLinePoint);
+      combinations[points[points.length - 1]].splice(randomInt, 1);
+    }
   }
   return points;
 };
@@ -72,23 +70,29 @@ const calculateFitness = (linePoints) => {
   //   console.log(combinations);
   return score;
 };
-// let many = [
-//   [2, 2, 4, 2, 3, 0, 1, 1, 4],
-//   [0, 4, 4, 4, 2, 0, 2, 4, 1],
-//   [4, 3, 2, 4, 0, 4, 0, 4, 4],
-// ];
-// for (let i = 0; i < many.length; i++) {
-//   let arrObj = [];
-//   for (j = 0; j < many[i].length - 1; j++) {
-//     arrObj[j] = [many[i][j], many[i][j + 1]];
-//   }
-//   console.log(arrObj);
-// }
-let a = [1, 2],
-  b = [2, 1];
-console.log(arrayEquals(a, b));
 
-// for (let i = 0; i < 4; i++) {
-//   let linePoints = generateLinePoints();
-//   console.log(linePoints, calculateFitness(linePoints));
-// }
+const duplicateChecker = (linePoints) => {
+  let arrObj = [];
+  let score = 0;
+  for (let j = 0; j < linePoints.length - 1; j++) {
+    arrObj[j] = [linePoints[j], linePoints[j + 1]];
+  }
+  for (let k = 0; k < arrObj.length; k++) {
+    let halt = false;
+    for (let m = k + 1; m < arrObj.length; m++) {
+      let nextReversed = arrObj[m].reverse();
+      if (
+        arrayEquals(arrObj[k], arrObj[m]) ||
+        arrayEquals(arrObj[k], nextReversed)
+      ) {
+        halt = true;
+        score = m;
+        break;
+      }
+    }
+    if (halt) break;
+  }
+  return score;
+};
+
+console.log(generateLinePoints());
