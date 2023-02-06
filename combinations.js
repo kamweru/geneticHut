@@ -45,29 +45,22 @@ const calculateFitness = (linePoints) => {
     [1, 2, 4],
     [0, 1, 2, 3],
   ];
-  for (let i = 0; i < linePoints.length; i++) {
+  for (let i = 0; i < duplicateChecker(linePoints); i++) {
     let currCombination = combinations[linePoints[i]];
     let nextLinePoint =
       i === linePoints.length - 1 ? linePoints[0] : linePoints[i + 1];
-    let prevLinePoint =
-      i === 0 ? linePoints[linePoints.length - 1] : linePoints[i - 1];
-    if (prevLinePoint !== nextLinePoint) {
-      if (currCombination.includes(nextLinePoint)) {
-        for (let j = 0; j < currCombination.length; j++) {
-          if (currCombination[j] === nextLinePoint) {
-            currCombination.splice(j, 1);
-            continue;
-          }
+    if (currCombination.includes(nextLinePoint)) {
+      for (let j = 0; j < currCombination.length; j++) {
+        if (currCombination[j] === nextLinePoint) {
+          currCombination.splice(j, 1);
+          continue;
         }
-        score++;
-      } else {
-        break;
       }
+      score++;
     } else {
       break;
     }
   }
-  //   console.log(combinations);
   return score;
 };
 
@@ -95,4 +88,9 @@ const duplicateChecker = (linePoints) => {
   return score;
 };
 
-console.log(generateLinePoints());
+for (let i = 0; i < 3; i++) {
+  let linePoints = generateLinePoints();
+  console.log(calculateFitness(linePoints), linePoints);
+}
+
+// console.log(generateLinePoints());
