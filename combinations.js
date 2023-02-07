@@ -45,7 +45,7 @@ const calculateFitness = (linePoints) => {
     [1, 2, 4],
     [0, 1, 2, 3],
   ];
-  for (let i = 0; i < duplicateChecker(linePoints); i++) {
+  for (let i = 0; i < linePoints.length; i++) {
     let currCombination = combinations[linePoints[i]];
     let nextLinePoint =
       i === linePoints.length - 1 ? linePoints[0] : linePoints[i + 1];
@@ -90,7 +90,15 @@ const duplicateChecker = (linePoints) => {
 
 for (let i = 0; i < 3; i++) {
   let linePoints = generateLinePoints();
-  console.log(calculateFitness(linePoints), linePoints);
+  console.log(linePoints);
+  for (let i = 0; i < linePoints.length; i++) {
+    for (let j = i + 1; j < linePoints.length; j++) {
+      if (linePoints[i] === linePoints[j]) {
+        console.log(i, j, linePoints[j]);
+      }
+    }
+  }
+  console.log("---------------");
 }
 
 // console.log(generateLinePoints());
