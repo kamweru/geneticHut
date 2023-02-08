@@ -6,121 +6,105 @@ const random = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 
-const lines = [
-  {
-    firstPoint: 0,
-    secondPoint: 1,
-  },
-  {
-    firstPoint: 0,
-    secondPoint: 4,
-  },
-  {
-    firstPoint: 1,
-    secondPoint: 2,
-  },
-  {
-    firstPoint: 1,
-    secondPoint: 4,
-  },
-  {
-    firstPoint: 2,
-    secondPoint: 3,
-  },
-  {
-    firstPoint: 2,
-    secondPoint: 4,
-  },
-  {
-    firstPoint: 3,
-    secondPoint: 1,
-  },
-  {
-    firstPoint: 3,
-    secondPoint: 4,
-  },
-];
-
-const generateRandomLine = (lineIndex) => {
-  let digits = ["firstPoint", "secondPoint"];
-  let firstRandom = Math.floor(Math.random() * digits.length);
-  let secondRandom = firstRandom === 0 ? 1 : 0;
-  let randomLine = {
-    firstPoint: lines[lineIndex][digits[firstRandom]],
-    secondPoint: lines[lineIndex][digits[secondRandom]],
-  };
-  return randomLine;
-};
-
-const lineScore = (point) => {
-  let score = 0;
-  for (const [index, line] of lines.entries()) {
-    if (
-      line.firstPoint === point.firstPoint &&
-      line.secondPoint === point.secondPoint
-    ) {
-      score++;
-      break;
-    }
-    if (
-      line.firstPoint === point.secondPoint &&
-      line.secondPoint === point.firstPoint
-    ) {
-      point.firstPoint = line.firstPoint;
-      point.secondPoint = line.secondPoint;
-      score++;
-      break;
-    }
-  }
-  return score;
+const generateEdge = () => {
+  let allowedEdges = [
+    [1, 4],
+    [0, 2, 3, 4],
+    [1, 3, 4],
+    [1, 2, 4],
+    [0, 1, 2, 3],
+  ];
+  let firstPoint = Math.floor(Math.random() * allowedEdges.length);
+  let secondPoint =
+    allowedEdges[firstPoint][
+      Math.floor(Math.random() * allowedEdges[firstPoint].length)
+    ];
+  return [firstPoint, secondPoint];
 };
 
 class Member {
   constructor() {
-    this.points = [];
+    this.edges = [];
     let min = 0,
       max = 8;
     for (let i = min; i < max; i++) {
-      let rand = random(min, max);
-      this.points[i] = lines[rand];
-      // generateRandomLine(rand);
+      this.edges[i] = generateEdge();
     }
   }
 
   fitness = () => {
     let score = 0;
-    // let lineScoreFitness = 0;
-    for (const [index, point] of this.points.entries()) {
-      let nextPoint =
-        index === this.points.length - 1
-          ? this.points[0]
-          : this.points[index + 1];
+    let edgeSet = [];
+    let continuity = [
+      [1, 4],
+      [0, 2, 3, 4],
+      [1, 3, 4],
+      [1, 2, 4],
+      [0, 1, 2, 3],
+    ];
 
-      //   lineScoreFitness += lineScore(point);
+    const arrayEquals = (a, b) => {
+      return (
+        Array.isArray(a) &&
+        Array.isArray(b) &&
+        a.length === b.length &&
+        a.every((val, index) => val === b[index])
+      );
+    };
 
-      if (point.secondPoint === nextPoint.firstPoint) {
+    const isDuplicate = (edge) => {
+      if (edgeSet.length) {
+        let edgeReversed = [edge[1], edge[0]];
+        for (let i = 0; i < edgeSet.length; i++) {
+          if (
+            arrayEquals(edgeSet[i], edge) ||
+            arrayEquals(edgeSet[i], edgeReversed)
+          ) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    const continous = (edge) => {
+      let firstPoint = edge[0],
+        secondPoint = edge[1];
+      if (continuity[firstPoint].includes(secondPoint)) {
+        let secondPointIndex = continuity[firstPoint].indexOf(secondPoint);
+        continuity[firstPoint].splice(secondPointIndex, 1);
+        return true;
+      }
+      return false;
+    };
+
+    for (let i = 0; i < this.edges.length; i++) {
+      // if (isDuplicate(this.edges[i])) {
+      //   break;
+      // } else {
+      //   edgeSet.push(this.edges[i]);
+      //   score++;
+      if (continous(this.edges[i])) {
+        console.log(i);
+        edgeSet.push(this.edges[i]);
         score++;
       } else {
         break;
       }
+      // }
     }
-    // if(score > 2)
-    // console.log(Math.min(score, lineScoreFitness))
-    // console.log(Math.min(score, lineScoreFitness) / 16)
     return score;
-    // / 8
-    // this.points.length
   };
 
   crossover = (partner) => {
     let child = new Member();
-    let midPoint = random(0, this.points.length);
+    let midPoint = random(0, this.edges.length);
 
-    for (let i = 0; i < this.points.length; i++) {
+    for (let i = 0; i < this.edges.length; i++) {
       if (i > midPoint) {
-        child.points[i] = this.points[i];
+        child.edges[i] = this.edges[i];
       } else {
-        child.points[i] = partner.points[i];
+        child.edges[i] = partner.edges[i];
       }
     }
 
@@ -128,10 +112,10 @@ class Member {
   };
 
   mutate = (mutationRate) => {
-    for (let i = 0; i < this.points.length; i++) {
+    for (let i = 0; i < this.edges.length; i++) {
       if (Math.random() < mutationRate) {
         let rand = random(0, 8);
-        this.points[i] = lines[rand];
+        this.edges[i] = lines[rand];
         //   generateRandomLine(rand);
       }
     }
@@ -170,7 +154,7 @@ class Population {
       const child = parentA.crossover(parentB);
 
       // Perform mutation
-      child.mutate(this.mutationRate);
+      // child.mutate(this.mutationRate);
 
       this.members[i] = child;
     }
@@ -189,14 +173,14 @@ const generate = (populationSize, mutationRate, generations) => {
   population.evolve(generations);
 
   // let blah = population.members.map(m => m.points)
-  // console.log(JSON.stringify(population.members))
+  // console.log(JSON.stringify(population.members));
   population.members.forEach((m) => {
     if (m.fitness() > 4) {
-      console.log(m.fitness(), m.points);
+      console.log(m.fitness(), m.edges);
     }
   });
 };
 
-generate(10, 0.05, 200);
+generate(5, 0.05, 200);
 
 // https://geekyisawesome.blogspot.com/2013/06/fitness-function-for-multi-objective.html
