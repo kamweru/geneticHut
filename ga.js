@@ -67,33 +67,42 @@ class Member {
       return false;
     };
 
-    const continous = (edge) => {
-      let firstPoint = edge[0],
-        secondPoint = edge[1];
-      if (continuity[firstPoint].includes(secondPoint)) {
-        let secondPointIndex = continuity[firstPoint].indexOf(secondPoint);
-        continuity[firstPoint].splice(secondPointIndex, 1);
-        return true;
+    const continous = (first, prevEdge, currEdge) => {
+      if (first) {
+        if (continuity[currEdge[0]].includes(currEdge[1])) {
+          let spliceIndex = continuity[currEdge[0]].indexOf(currEdge[1]);
+          continuity[currEdge[0]].splice(spliceIndex, 1);
+          return true;
+        }
+      } else {
+        if (
+          continuity[currEdge[0]].includes(currEdge[1]) &&
+          prevEdge[1] === currEdge[0]
+        ) {
+          let spliceIndex = continuity[currEdge[0]].indexOf(currEdge[1]);
+          continuity[currEdge[0]].splice(spliceIndex, 1);
+          return true;
+        }
       }
       return false;
     };
 
     for (let i = 0; i < this.edges.length; i++) {
-      // if (isDuplicate(this.edges[i])) {
-      //   break;
-      // } else {
-      //   edgeSet.push(this.edges[i]);
-      //   score++;
-      if (continous(this.edges[i])) {
-        console.log(i);
-        edgeSet.push(this.edges[i]);
-        score++;
-      } else {
+      if (isDuplicate(this.edges[i])) {
         break;
+      } else {
+        let first = i === 0 ? true : false;
+        let currEdge = this.edges[i];
+        let prevEdge = i === 0 ? currEdge : this.edges[i - 1];
+        if (continous(first, prevEdge, currEdge)) {
+          edgeSet.push(this.edges[i]);
+          score++;
+        } else {
+          break;
+        }
       }
-      // }
     }
-    return score;
+    return score / 8;
   };
 
   crossover = (partner) => {
@@ -114,9 +123,19 @@ class Member {
   mutate = (mutationRate) => {
     for (let i = 0; i < this.edges.length; i++) {
       if (Math.random() < mutationRate) {
-        let rand = random(0, 8);
-        this.edges[i] = lines[rand];
-        //   generateRandomLine(rand);
+        let allowedEdges = [
+          [1, 4],
+          [0, 2, 3, 4],
+          [1, 3, 4],
+          [1, 2, 4],
+          [0, 1, 2, 3],
+        ];
+        let firstPoint = Math.floor(Math.random() * allowedEdges.length);
+        let secondPoint =
+          allowedEdges[firstPoint][
+            Math.floor(Math.random() * allowedEdges[firstPoint].length)
+          ];
+        this.edges[i] = [firstPoint, secondPoint];
       }
     }
   };
@@ -136,8 +155,8 @@ class Population {
   _selectMembersForMating = () => {
     let matingPool = [];
     this.members.forEach((m) => {
-      // let f = Math.floor(m.fitness() * 100) || 1
-      let f = m.fitness() || 1;
+      let f = Math.floor(m.fitness() * 100) || 1;
+      // let f = m.fitness() || 1;
       for (let i = 0; i < f; i++) {
         matingPool.push(m);
       }
@@ -154,7 +173,7 @@ class Population {
       const child = parentA.crossover(parentB);
 
       // Perform mutation
-      // child.mutate(this.mutationRate);
+      child.mutate(this.mutationRate);
 
       this.members[i] = child;
     }
@@ -175,9 +194,9 @@ const generate = (populationSize, mutationRate, generations) => {
   // let blah = population.members.map(m => m.points)
   // console.log(JSON.stringify(population.members));
   population.members.forEach((m) => {
-    if (m.fitness() > 4) {
-      console.log(m.fitness(), m.edges);
-    }
+    // if (m.fitness() > 4) {
+    console.log(m.fitness() * 8, m.edges);
+    // }
   });
 };
 
