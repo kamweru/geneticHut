@@ -108,3 +108,30 @@ let allowedEdges = [
   [3, 1],
   [3, 4],
 ];
+
+let linePoints = [3, 2, 1, 0, 4, 1, 3, 4, 2];
+
+function evaluateFitness(linePoints, allowedEdges) {
+  let continuousEdges = 0;
+  for (let i = 0; i < linePoints.length - 1; i++) {
+    let edge = [linePoints[i], linePoints[i + 1]];
+    if (!isEdgeAllowed(edge, allowedEdges)) {
+      break;
+    }
+    continuousEdges++;
+  }
+  return continuousEdges;
+}
+
+function isEdgeAllowed(edge, allowedEdges) {
+  for (let i = 0; i < allowedEdges.length; i++) {
+    let allowedEdge = allowedEdges[i];
+    if (
+      (edge[0] === allowedEdge[0] && edge[1] === allowedEdge[1]) ||
+      (edge[0] === allowedEdge[1] && edge[1] === allowedEdge[0])
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
