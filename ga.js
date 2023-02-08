@@ -146,6 +146,9 @@ class Population {
     size = size || 1;
     this.members = [];
     this.mutationRate = mutationRate;
+    this.generation = 0;
+    this.perfectFitness = 8;
+    this.bestMember = null;
 
     for (let i = 0; i < size; i++) {
       this.members.push(new Member());
@@ -156,7 +159,6 @@ class Population {
     let matingPool = [];
     this.members.forEach((m) => {
       let f = Math.floor(m.fitness() * 100) || 1;
-      // let f = m.fitness() || 1;
       for (let i = 0; i < f; i++) {
         matingPool.push(m);
       }
@@ -179,25 +181,48 @@ class Population {
     }
   };
 
-  evolve = (generations) => {
-    for (let i = 0; i < generations; i++) {
-      const pool = this._selectMembersForMating();
-      this._reproduce(pool);
+  _bestFitness = () => {
+    let bestFitness = 0;
+
+    this.members.forEach((m) => {
+      if (m.fitness() * 8 > bestFitness) {
+        bestFitness = m.fitness() * 8;
+        this.bestMember = m.edges;
+      }
+    });
+    return bestFitness;
+  };
+
+  evolve = () => {
+    const pool = this._selectMembersForMating();
+    this._reproduce(pool);
+
+    // decrease the number value
+    const fitness = this._bestFitness();
+    console.log();
+    if (fitness === this.perfectFitness) {
+      console.log(fitness, this.generation, this.bestMember);
+    }
+    this.generation++;
+
+    // base case
+    if (fitness < this.perfectFitness) {
+      return this.evolve();
     }
   };
 }
 
 const generate = (populationSize, mutationRate, generations) => {
   const population = new Population(populationSize, mutationRate);
-  population.evolve(generations);
-
+  population.evolve();
+  // console.log(population.sum(populationSize));
   // let blah = population.members.map(m => m.points)
   // console.log(JSON.stringify(population.members));
-  population.members.forEach((m) => {
-    // if (m.fitness() > 4) {
-    console.log(m.fitness() * 8, m.edges);
-    // }
-  });
+  // population.members.forEach((m) => {
+  //   // if (m.fitness() > 4) {
+  //   console.log(m.fitness() * 8, m.edges);
+  //   // }
+  // });
 };
 
 generate(5, 0.05, 200);
