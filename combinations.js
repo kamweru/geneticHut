@@ -18,6 +18,7 @@ const generateLinePoints = () => {
     [0, 1, 2, 3],
   ];
   let points = [];
+  let pointsArray = [];
 
   while (points.length < 9) {
     if (points.length === 0) {
@@ -33,7 +34,10 @@ const generateLinePoints = () => {
       combinations[points[points.length - 1]].splice(randomInt, 1);
     }
   }
-  return points;
+  for (let j = 0; j < points.length - 1; j++) {
+    pointsArray[j] = [points[j], points[j + 1]];
+  }
+  return pointsArray;
 };
 
 const calculateFitness = (linePoints) => {
@@ -88,17 +92,19 @@ const duplicateChecker = (linePoints) => {
   return score;
 };
 
-for (let i = 0; i < 3; i++) {
-  let linePoints = generateLinePoints();
-  console.log(linePoints);
-  for (let i = 0; i < linePoints.length; i++) {
-    for (let j = i + 1; j < linePoints.length; j++) {
-      if (linePoints[i] === linePoints[j]) {
-        console.log(i, j, linePoints[j]);
-      }
-    }
-  }
-  console.log("---------------");
-}
+let vertices = [...Array(5).keys()];
+let forbidden = [
+  [0, 2],
+  [0, 3],
+];
 
-// console.log(generateLinePoints());
+let allowedEdges = [
+  [0, 1],
+  [0, 4],
+  [1, 2],
+  [1, 4],
+  [2, 3],
+  [2, 4],
+  [3, 1],
+  [3, 4],
+];
