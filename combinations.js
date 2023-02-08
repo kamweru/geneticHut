@@ -34,10 +34,10 @@ const generateLinePoints = () => {
       combinations[points[points.length - 1]].splice(randomInt, 1);
     }
   }
-  for (let j = 0; j < points.length - 1; j++) {
-    pointsArray[j] = [points[j], points[j + 1]];
-  }
-  return pointsArray;
+  // for (let j = 0; j < points.length - 1; j++) {
+  //   pointsArray[j] = [points[j], points[j + 1]];
+  // }
+  return points;
 };
 
 const calculateFitness = (linePoints) => {
@@ -109,7 +109,7 @@ let allowedEdges = [
   [3, 4],
 ];
 
-let linePoints = [3, 2, 1, 0, 4, 1, 3, 4, 2];
+// let linePoints = [3, 2, 1, 0, 4, 1, 3, 4, 2];
 
 function evaluateFitness(linePoints, allowedEdges) {
   let continuousEdges = 0;
@@ -134,4 +134,63 @@ function isEdgeAllowed(edge, allowedEdges) {
     }
   }
   return false;
+}
+
+let notAnotherOne = (linePoints) => {
+  let continuity = [
+    [1, 4],
+    [0, 2, 3, 4],
+    [1, 3, 4],
+    [1, 2, 4],
+    [0, 1, 2, 3],
+  ];
+
+  let edgeSet = [];
+  let edgeCount = 0;
+
+  const continous = (firstPoint, secondPoint) => {
+    if (continuity[firstPoint].includes(secondPoint)) {
+      let secondPointIndex = continuity[firstPoint].indexOf(secondPoint);
+      continuity[firstPoint].splice(secondPointIndex, 1);
+      return true;
+    }
+    return false;
+  };
+
+  const isDuplicate = (edge, edgeReversed) => {
+    if (edgeSet.length) {
+      for (let i = 0; i < edgeSet.length; i++) {
+        if (
+          arrayEquals(edgeSet[i], edge) ||
+          arrayEquals(edgeSet[i], edgeReversed)
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  for (let i = 0; i < linePoints.length - 1; i++) {
+    let firstPoint = linePoints[i];
+    let secondPoint = linePoints[i + 1];
+    let edge = [firstPoint, secondPoint];
+    let edgeReversed = [secondPoint, firstPoint];
+    if (isDuplicate(edge, edgeReversed)) {
+      break;
+    } else {
+      if (continous(firstPoint, secondPoint)) {
+        edgeSet.push(edge);
+        edgeCount++;
+      } else {
+        break;
+      }
+    }
+  }
+  return edgeCount;
+};
+
+for (let i = 0; i < 3; i++) {
+  let linePoints = generateLinePoints();
+  console.log(notAnotherOne(linePoints), linePoints);
 }
