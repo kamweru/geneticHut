@@ -1,9 +1,59 @@
+const fs = require("fs");
+let jsonData = require("./solutions.json");
+
 const random = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
 
   // The maximum is exclusive and the minimum is inclusive
   return Math.floor(Math.random() * (max - min)) + min;
+};
+let solutions = jsonData.first;
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+const arrayEquals = (a, b) => {
+  return (
+    Array.isArray(a) &&
+    Array.isArray(b) &&
+    a.length === b.length &&
+    a.every((val, index) => val === b[index])
+  );
+};
+
+const isDuplicateSolution = (currGenerations, currSolution) => {
+  let duplicateEdgesArray = [];
+
+  solutions.forEach(({ generations, solution }) => {
+    let duplicateEdges = 0;
+    solution.forEach((solutionItem) => {
+      currSolution.forEach((currSolutionItem) => {
+        if (arrayEquals(solutionItem, currSolutionItem)) {
+          duplicateEdges++;
+        }
+        // if (
+        //   arrayEquals(currSolutionItem, [
+        //     solution[solution.length - 1 - index][1],
+        //     solution[solution.length - 1 - index][0],
+        //   ])
+        // ) {
+        //   duplicateEdges++;
+        // }
+      });
+    });
+    duplicateEdgesArray.push(duplicateEdges);
+  });
+  let maxDuplicateEdges = Math.max(...duplicateEdgesArray);
+  if (maxDuplicateEdges === 8) {
+    let duplicateIndex = duplicateEdgesArray.indexOf(maxDuplicateEdges);
+    solutions[duplicateIndex].generations.push(currGenerations);
+    return true;
+  }
+  return;
 };
 
 const generateEdge = () => {
@@ -15,6 +65,7 @@ const generateEdge = () => {
     [0, 1, 2, 3],
   ];
   let firstPoint = Math.floor(Math.random() * allowedEdges.length);
+  shuffleArray(allowedEdges[firstPoint]);
   let secondPoint =
     allowedEdges[firstPoint][
       Math.floor(Math.random() * allowedEdges[firstPoint].length)
@@ -42,15 +93,6 @@ class Member {
       [1, 2, 4],
       [0, 1, 2, 3],
     ];
-
-    const arrayEquals = (a, b) => {
-      return (
-        Array.isArray(a) &&
-        Array.isArray(b) &&
-        a.length === b.length &&
-        a.every((val, index) => val === b[index])
-      );
-    };
 
     const isDuplicate = (edge) => {
       if (edgeSet.length) {
@@ -116,7 +158,6 @@ class Member {
         child.edges[i] = partner.edges[i];
       }
     }
-
     return child;
   };
 
@@ -131,6 +172,7 @@ class Member {
           [0, 1, 2, 3],
         ];
         let firstPoint = Math.floor(Math.random() * allowedEdges.length);
+        shuffleArray(allowedEdges[firstPoint]);
         let secondPoint =
           allowedEdges[firstPoint][
             Math.floor(Math.random() * allowedEdges[firstPoint].length)
@@ -193,38 +235,44 @@ class Population {
     return bestFitness;
   };
 
+  getGeneration = () => this.generation;
+
   evolve = () => {
-    const pool = this._selectMembersForMating();
-    this._reproduce(pool);
-
-    // decrease the number value
-    const fitness = this._bestFitness();
-    console.log();
-    if (fitness === this.perfectFitness) {
-      console.log(fitness, this.generation, this.bestMember);
-    }
-    this.generation++;
-
-    // base case
-    if (fitness < this.perfectFitness) {
-      return this.evolve();
+    while (true) {
+      const fitness = this._bestFitness();
+      if (fitness === this.perfectFitness) {
+        // console.log(fitness, this.generation, this.bestMember);
+        if (!isDuplicateSolution(this.generation, this.bestMember)) {
+          solutions.push({
+            generations: [this.generation],
+            solution: this.bestMember,
+          });
+          break;
+        }
+      }
+      const pool = this._selectMembersForMating();
+      this._reproduce(pool);
+      this.generation++;
     }
   };
 }
 
-const generate = (populationSize, mutationRate, generations) => {
-  const population = new Population(populationSize, mutationRate);
-  population.evolve();
-  // console.log(population.sum(populationSize));
-  // let blah = population.members.map(m => m.points)
-  // console.log(JSON.stringify(population.members));
-  // population.members.forEach((m) => {
-  //   // if (m.fitness() > 4) {
-  //   console.log(m.fitness() * 8, m.edges);
-  //   // }
-  // });
+const generate = (populationSize, mutationRate) => {
+  while (true) {
+    if (solutions.length === 15) break;
+    console.log(solutions.length);
+    const population = new Population(populationSize, mutationRate);
+    population.evolve();
+  }
+
+  let data = JSON.stringify(jsonData, null, 2);
+
+  fs.writeFile("./solutions.json", data, (err) => {
+    if (err) throw err;
+    console.log("Data written to file");
+  });
 };
 
-generate(5, 0.05, 200);
-
+generate(200, 0.05);
+console.log(JSON.stringify(solutions));
 // https://geekyisawesome.blogspot.com/2013/06/fitness-function-for-multi-objective.html

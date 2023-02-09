@@ -1,38 +1,19 @@
-function calculateFitness(vertices, edges) {
-  let edgeSet = new Set();
-  let visited = new Array(vertices.length).fill(false);
-  let pathContinuous = true;
-  let edgeCount = 0;
+const fs = require("fs");
+let jsonData = require("./solutions.json");
 
-  let dfs = function (vertex) {
-    visited[vertex] = true;
-    for (let i = 0; i < vertices.length; i++) {
-      if (edges[vertex][i]) {
-        let edge = [vertex, i];
-        let edgeReversed = [i, vertex];
+let student = {
+  name: "Mike",
+  age: 23,
+  gender: "Male",
+  department: "English",
+  car: "Honda",
+};
 
-        if (edgeSet.has(edge) || edgeSet.has(edgeReversed)) {
-          pathContinuous = false;
-          break;
-        } else {
-          edgeSet.add(edge);
-          edgeCount++;
-          if (!visited[i]) {
-            dfs(i);
-          }
-        }
-      }
-    }
-  };
+jsonData["first"].push(student);
 
-  dfs(0);
+let data = JSON.stringify(jsonData, null, 2);
 
-  for (let i = 0; i < vertices.length; i++) {
-    if (!visited[i]) {
-      pathContinuous = false;
-      break;
-    }
-  }
-
-  return (pathContinuous ? 1 : 0) / (edgeCount + 1);
-}
+fs.writeFile("./solutions.json", data, (err) => {
+  if (err) throw err;
+  console.log("Data written to file");
+});
