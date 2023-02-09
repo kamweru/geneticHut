@@ -189,7 +189,7 @@ class Population {
     this.members = [];
     this.mutationRate = mutationRate;
     this.generation = 0;
-    this.perfectFitness = 8;
+    this.perfectFitness = 6;
     this.bestMember = null;
 
     for (let i = 0; i < size; i++) {
