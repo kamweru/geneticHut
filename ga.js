@@ -259,7 +259,7 @@ class Population {
 
 const generate = (populationSize, mutationRate) => {
   while (true) {
-    if (solutions.length === 15) break;
+    if (solutions.length === 100) break;
     console.log(solutions.length);
     const population = new Population(populationSize, mutationRate);
     population.evolve();
@@ -273,6 +273,6 @@ const generate = (populationSize, mutationRate) => {
   });
 };
 
-generate(200, 0.05);
+generate(200, 0.5);
 console.log(JSON.stringify(solutions));
 // https://geekyisawesome.blogspot.com/2013/06/fitness-function-for-multi-objective.html
