@@ -147,7 +147,7 @@ class Population {
     this.members = [];
     this.mutationRate = mutationRate;
     this.generation = 0;
-    this.perfectFitness = 8;
+    this.perfectFitness = 6;
     this.bestMember = null;
 
     for (let i = 0; i < size; i++) {
@@ -199,8 +199,8 @@ class Population {
 
     // decrease the number value
     const fitness = this._bestFitness();
-    console.log();
-    if (fitness === this.perfectFitness) {
+    // console.log();
+    if (fitness >= this.perfectFitness) {
       console.log(fitness, this.generation, this.bestMember);
     }
     this.generation++;
