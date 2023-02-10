@@ -189,7 +189,7 @@ class Population {
     this.members = [];
     this.mutationRate = mutationRate;
     this.generation = 0;
-    this.perfectFitness = 6;
+    this.perfectFitness = 8;
     this.bestMember = null;
 
     for (let i = 0; i < size; i++) {
@@ -247,6 +247,7 @@ class Population {
             generations: [this.generation],
             solution: this.bestMember,
           });
+          // console.log(JSON.stringify(solutions));
           break;
         }
       }
@@ -259,8 +260,8 @@ class Population {
 
 const generate = (populationSize, mutationRate) => {
   while (true) {
-    if (solutions.length === 100) break;
-    console.log(solutions.length);
+    if (solutions.length === 17) break;
+    // console.log(solutions.length);
     const population = new Population(populationSize, mutationRate);
     population.evolve();
   }
@@ -273,6 +274,10 @@ const generate = (populationSize, mutationRate) => {
   });
 };
 
-generate(200, 0.5);
-console.log(JSON.stringify(solutions));
+generate(10, 0.05);
+console.log("---------------------------");
+solutions.forEach(({ generations, solution }) => {
+  console.log(`${generations.length} --> ${Math.max(...generations)}`);
+});
+
 // https://geekyisawesome.blogspot.com/2013/06/fitness-function-for-multi-objective.html
